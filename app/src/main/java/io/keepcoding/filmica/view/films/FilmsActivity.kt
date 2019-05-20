@@ -17,7 +17,8 @@ const val TAG_TRENDS = "trending"
 const val TAG_WATCHLIST = "watchlist"
 
 class FilmsActivity : AppCompatActivity(),
-    FilmsFragment.OnFilmClickLister {
+    FilmsFragment.OnFilmClickLister,
+    TrendsFragment.OnFilmClickLister {
 
     private lateinit var filmsFragment: FilmsFragment
     private lateinit var trendsFragment: TrendsFragment
@@ -63,6 +64,7 @@ class FilmsActivity : AppCompatActivity(),
             .add(R.id.container, filmsFragment, TAG_FILM)
             .add(R.id.container, trendsFragment, TAG_TRENDS)
             .add(R.id.container, watchlistFragment, TAG_WATCHLIST)
+            .hide(trendsFragment)
             .hide(watchlistFragment)
             .commit()
     }
@@ -73,12 +75,11 @@ class FilmsActivity : AppCompatActivity(),
         watchlistFragment =
             supportFragmentManager.findFragmentByTag(TAG_WATCHLIST) as WatchlistFragment
 
-        if (tag == TAG_WATCHLIST)
-            activeFragment = watchlistFragment
-        else activeFragment = if (tag == TAG_TRENDS)
-                                    trendsFragment
-                                else
-                                    filmsFragment
+        when (tag) {
+            TAG_TRENDS -> activeFragment = trendsFragment
+            TAG_WATCHLIST -> activeFragment = watchlistFragment
+            else -> activeFragment = filmsFragment
+        }
 
     }
 
