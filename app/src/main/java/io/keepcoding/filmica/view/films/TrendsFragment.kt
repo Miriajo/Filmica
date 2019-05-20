@@ -14,7 +14,7 @@ import io.keepcoding.filmica.view.util.GridOffsetDecoration
 import kotlinx.android.synthetic.main.fragment_films.*
 import kotlinx.android.synthetic.main.layout_error.*
 
-class FilmsFragment : Fragment() {
+class TrendsFragment : Fragment() {
 
     lateinit var listener: OnFilmClickLister
 
@@ -60,8 +60,7 @@ class FilmsFragment : Fragment() {
     private fun reload() {
         showProgress()
 
-
-        FilmsRepo.discoverFilms(context!!,
+        FilmsRepo.trendingFilms(context!!,
             { films ->
                 adapter.setFilms(films)
                 showList()

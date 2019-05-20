@@ -7,6 +7,11 @@
         android:title="@string/title_discover"/>
 
     <item
+            android:id="@+id/action_trending"
+            android:icon="@drawable/ic_trend"
+            android:title="@string/title_trending"/>
+
+    <item
         android:id="@+id/action_watchlist"
         android:icon="@drawable/ic_watchlist"
         android:title="@string/title_watchlist"/>
