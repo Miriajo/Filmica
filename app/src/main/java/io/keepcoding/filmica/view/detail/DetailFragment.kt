@@ -5,6 +5,7 @@ import android.content.res.ColorStateList
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.os.Bundle
+import android.support.design.widget.Snackbar
 import android.support.v4.app.Fragment
 import android.support.v4.content.ContextCompat
 import android.support.v7.graphics.Palette
@@ -16,6 +17,7 @@ import io.keepcoding.filmica.data.Film
 import io.keepcoding.filmica.data.FilmsRepo
 import io.keepcoding.filmica.view.util.SimpleTarget
 import kotlinx.android.synthetic.main.fragment_detail.*
+import kotlinx.android.synthetic.main.fragment_watchlist.*
 
 class DetailFragment : Fragment() {
 
@@ -88,8 +90,21 @@ class DetailFragment : Fragment() {
 
         buttonAdd.setOnClickListener {
             film?.let {
+
                 FilmsRepo.saveFilm(context!!, it) {
-                    Toast.makeText(context, "Añadido al watchlist", Toast.LENGTH_LONG).show()
+                  //  Toast.makeText(context, "Añadido al watchlist", Toast.LENGTH_LONG).show()
+
+                    val item = it
+
+                    Snackbar.make(this.view!!, "Added to Watchlist", Snackbar.LENGTH_LONG)
+                            .setAction("UNDO", {
+                                FilmsRepo.deleteFilm(context!! , item) {
+                                    Toast.makeText(context, "Watchlist restored", Toast.LENGTH_SHORT).show()
+                                }
+                            })
+                            .setActionTextColor(Color.WHITE)
+                            .show()
+
                 }
             }
         }

@@ -64,8 +64,12 @@ data class Film(
                 genres.add(genre)
             }
 
-            return genres.reduce { acc, genre ->  "$acc | $genre" }
-
+            if (genres.isEmpty()) {
+                return ""
+            }
+            else {
+                return genres.reduce { acc, genre -> "$acc | $genre" }
+            }
         }
     }
 }

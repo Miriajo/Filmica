@@ -54,7 +54,7 @@ object FilmsRepo {
     }
 
     fun getFilms(
-        context: Context,
+    context: Context,
         callback: (List<Film>) -> Unit
     ) {
         GlobalScope.launch(Dispatchers.Main) {
@@ -117,6 +117,33 @@ object FilmsRepo {
         onError: (VolleyError) -> Unit
     ) {
         val url = ApiRoutes.trendingMoviesUrl()
+        val request = JsonObjectRequest(Request.Method.GET, url, null,
+            { response ->
+                val films =
+                    Film.parseFilms(response.getJSONArray("results"))
+                FilmsRepo.films.clear()
+                FilmsRepo.films.addAll(films)
+                onResponse.invoke(FilmsRepo.films)
+            },
+            { error ->
+                error.printStackTrace()
+                onError.invoke(error)
+            }
+        )
+
+        Volley.newRequestQueue(context)
+            .add(request)
+    }
+
+
+    // Create a func to get Search
+    fun searchFilms(
+        context: Context,
+        query: String,
+        onResponse: (List<Film>) -> Unit,
+        onError: (VolleyError) -> Unit
+    ) {
+        val url = ApiRoutes.searchMoviesUrl(query)
         val request = JsonObjectRequest(Request.Method.GET, url, null,
             { response ->
                 val films =

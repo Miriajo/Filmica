@@ -1,7 +1,10 @@
 package io.keepcoding.filmica.view.watchlist
 
 
+import android.content.Context
+import android.graphics.Color
 import android.os.Bundle
+import android.support.design.widget.Snackbar
 import android.support.v4.app.Fragment
 import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.helper.ItemTouchHelper
@@ -12,17 +15,29 @@ import android.view.ViewGroup
 import io.keepcoding.filmica.R
 import io.keepcoding.filmica.data.Film
 import io.keepcoding.filmica.data.FilmsRepo
+import io.keepcoding.filmica.view.films.FilmsFragment
 import io.keepcoding.filmica.view.util.BaseFilmHolder
 import io.keepcoding.filmica.view.util.SwipeToDeleteCallback
+import kotlinx.android.synthetic.main.activity_films.*
 import kotlinx.android.synthetic.main.fragment_watchlist.*
 
 class WatchlistFragment : Fragment() {
 
+
+    lateinit var listener: FilmsFragment.OnFilmClickLister
+
     val adapter: WatchListAdapter = WatchListAdapter {
-        showDetail(it)
+        listener.onClick(it)
     }
 
-    private fun showDetail(film: Film) {
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+
+        if (context is FilmsFragment.OnFilmClickLister) {
+            listener = context
+        } else {
+            throw IllegalArgumentException("The attached activity isn't implementing ${FilmsFragment.OnFilmClickLister::class.java.canonicalName}")
+        }
     }
 
     override fun onCreateView(
@@ -39,12 +54,14 @@ class WatchlistFragment : Fragment() {
         watchlist.adapter = adapter
     }
 
+
     private fun setupSwipeHandler() {
         val swipeHandler = object : SwipeToDeleteCallback() {
             override fun onSwiped(holder: RecyclerView.ViewHolder, direction: Int) {
                 val film = (holder as BaseFilmHolder).film
                 val position = holder.adapterPosition
                 deleteFilm(film, position)
+
             }
         }
 
@@ -55,7 +72,17 @@ class WatchlistFragment : Fragment() {
     private fun deleteFilm(film: Film, position: Int) {
         FilmsRepo.deleteFilm(context!!, film) {
             adapter.deleteFilm(position)
+
+            Snackbar.make(watchlist, "Item deleted", Snackbar.LENGTH_LONG)
+                    .setAction("UNDO"){
+                        FilmsRepo.saveFilm(context!!, film) {
+                            adapter.insertFilm(position, film)
+                        }
+                    }
+                    .setActionTextColor(Color.WHITE)
+                    .show()
         }
+
     }
 
     override fun onResume() {
@@ -66,5 +93,8 @@ class WatchlistFragment : Fragment() {
         }
     }
 
+    interface OnFilmClickLister {
+        fun onClick(film: Film)
+    }
 
 }
