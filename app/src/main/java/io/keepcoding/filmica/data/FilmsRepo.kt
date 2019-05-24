@@ -6,6 +6,9 @@ import com.android.volley.Request
 import com.android.volley.VolleyError
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
+import io.keepcoding.filmica.view.films.TAG_FILM
+import io.keepcoding.filmica.view.films.TAG_SEARCH
+import io.keepcoding.filmica.view.films.TAG_TRENDS
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
@@ -13,7 +16,10 @@ import kotlinx.coroutines.launch
 
 object FilmsRepo {
 
-    private val films: MutableList<Film> = mutableListOf()
+    private val discoverFilms: MutableList<Film> = mutableListOf()
+    private val trendingFilms: MutableList<Film> = mutableListOf()
+    private val watchlistFilms: MutableList<Film> = mutableListOf()
+    private val searchFilms: MutableList<Film> = mutableListOf()
 
     @Volatile
     private var db: FilmDatabase? = null
@@ -30,9 +36,24 @@ object FilmsRepo {
         return db as FilmDatabase
     }
 
-    fun findFilmById(id: String): Film? {
-        return films.find {
-            return@find it.id == id
+    fun findFilmById(id: String, type: String): Film? {
+
+        if (type == TAG_FILM) {
+            return discoverFilms.find {
+                return@find it.id == id
+            }
+        } else if (type == TAG_TRENDS) {
+            return trendingFilms.find {
+                return@find it.id == id
+            }
+        } else if (type == TAG_SEARCH) {
+            return searchFilms.find {
+                return@find it.id == id
+            }
+        } else {
+            return watchlistFilms.find {
+                return@find it.id == id
+            }
         }
 
     }
@@ -65,7 +86,9 @@ object FilmsRepo {
             }
 
             val films = async.await()
-            callback.invoke(films)
+            watchlistFilms.clear()
+            watchlistFilms.addAll(films)
+            callback.invoke(watchlistFilms)
         }
     }
 
@@ -95,9 +118,9 @@ object FilmsRepo {
             { response ->
                 val films =
                     Film.parseFilms(response.getJSONArray("results"))
-                FilmsRepo.films.clear()
-                FilmsRepo.films.addAll(films)
-                onResponse.invoke(FilmsRepo.films)
+                FilmsRepo.discoverFilms.clear()
+                FilmsRepo.discoverFilms.addAll(films)
+                onResponse.invoke(FilmsRepo.discoverFilms)
             },
             { error ->
                 error.printStackTrace()
@@ -121,9 +144,9 @@ object FilmsRepo {
             { response ->
                 val films =
                     Film.parseFilms(response.getJSONArray("results"))
-                FilmsRepo.films.clear()
-                FilmsRepo.films.addAll(films)
-                onResponse.invoke(FilmsRepo.films)
+                FilmsRepo.trendingFilms.clear()
+                FilmsRepo.trendingFilms.addAll(films)
+                onResponse.invoke(FilmsRepo.trendingFilms)
             },
             { error ->
                 error.printStackTrace()
@@ -148,9 +171,9 @@ object FilmsRepo {
             { response ->
                 val films =
                     Film.parseFilms(response.getJSONArray("results"))
-                FilmsRepo.films.clear()
-                FilmsRepo.films.addAll(films)
-                onResponse.invoke(FilmsRepo.films)
+                FilmsRepo.searchFilms.clear()
+                FilmsRepo.searchFilms.addAll(films)
+                onResponse.invoke(FilmsRepo.searchFilms)
             },
             { error ->
                 error.printStackTrace()

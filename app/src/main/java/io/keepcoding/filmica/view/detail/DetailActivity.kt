@@ -14,9 +14,11 @@ class DetailActivity : AppCompatActivity() {
         if (savedInstanceState == null) {
             val fragment = DetailFragment()
             val id = intent.getStringExtra("id")
+            val filmType = intent.getStringExtra("filmType")
 
             val args = Bundle()
             args.putString("id", id)
+            args.putString("filmType", filmType)
 
             fragment.arguments = args
 

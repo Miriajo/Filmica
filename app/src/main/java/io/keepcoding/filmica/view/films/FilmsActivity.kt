@@ -9,6 +9,7 @@ import io.keepcoding.filmica.R
 import io.keepcoding.filmica.data.Film
 import io.keepcoding.filmica.view.detail.DetailActivity
 import io.keepcoding.filmica.view.detail.DetailFragment
+import io.keepcoding.filmica.view.detail.PlaceholderFragment
 import io.keepcoding.filmica.view.search.SearchFragment
 import io.keepcoding.filmica.view.watchlist.WatchlistFragment
 import kotlinx.android.synthetic.main.activity_films.*
@@ -30,15 +31,20 @@ class FilmsActivity : AppCompatActivity(),
     private lateinit var searchFragment: SearchFragment
     private lateinit var activeFragment: Fragment
 
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_films)
 
         if (savedInstanceState == null) {
             setupFragments()
+            if (isDetailViewAvailable())
+                showPlaceholder()
         } else {
-            val tag = savedInstanceState.getString("active", TAG_FILM)
-            restoreFragments(tag)
+            val activeTag = savedInstanceState.getString("active", TAG_FILM)
+            restoreFragments(activeTag)
+//            if (isDetailViewAvailable())
+               // showPlaceholder()
         }
 
         // Show the correct fragment taking into account the menu button clicked
@@ -78,7 +84,7 @@ class FilmsActivity : AppCompatActivity(),
             .commit()
     }
 
-    private fun restoreFragments(tag: String) {
+    private fun restoreFragments(activeTag: String) {
         filmsFragment = supportFragmentManager.findFragmentByTag(TAG_FILM) as FilmsFragment
         trendsFragment = supportFragmentManager.findFragmentByTag(TAG_TRENDS) as TrendsFragment
         watchlistFragment =
@@ -86,11 +92,11 @@ class FilmsActivity : AppCompatActivity(),
         searchFragment =
                 supportFragmentManager.findFragmentByTag(TAG_SEARCH) as SearchFragment
 
-        when (tag) {
-            TAG_TRENDS -> activeFragment = trendsFragment
-            TAG_WATCHLIST -> activeFragment = watchlistFragment
-            TAG_SEARCH -> activeFragment = searchFragment
-            else -> activeFragment = filmsFragment
+        activeFragment = when (activeTag) {
+            TAG_TRENDS -> trendsFragment
+            TAG_WATCHLIST -> watchlistFragment
+            TAG_SEARCH -> searchFragment
+            else -> filmsFragment
         }
 
     }
@@ -104,21 +110,29 @@ class FilmsActivity : AppCompatActivity(),
         activeFragment = fragment
     }
 
+    private fun showPlaceholder() {
+        val fragment = PlaceholderFragment()
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.container_detail, fragment)
+            .commit()
+    }
+
     override fun onClick(film: Film) {
-        if (!isDetailDetailViewAvailable()) {
+        if (!isDetailViewAvailable()) {
             val intent = Intent(this, DetailActivity::class.java)
             intent.putExtra("id", film.id)
+            intent.putExtra("filmType", activeFragment.tag.toString())
             startActivity(intent)
         } else {
             supportFragmentManager.beginTransaction()
                 .replace(
                     R.id.container_detail,
-                    DetailFragment.newInstance(film.id)
+                    DetailFragment.newInstance(film.id, activeFragment.tag.toString())
                 )
                 .commit()
         }
     }
 
-    private fun isDetailDetailViewAvailable() =
+    private fun isDetailViewAvailable() =
         findViewById<FrameLayout>(R.id.container_detail) != null
 }

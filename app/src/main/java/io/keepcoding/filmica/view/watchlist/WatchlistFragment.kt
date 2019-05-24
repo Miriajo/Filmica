@@ -73,7 +73,7 @@ class WatchlistFragment : Fragment() {
         FilmsRepo.deleteFilm(context!!, film) {
             adapter.deleteFilm(position)
 
-            Snackbar.make(watchlist, "Item deleted", Snackbar.LENGTH_LONG)
+            Snackbar.make(watchlist, R.string.remove_watchlist, Snackbar.LENGTH_LONG)
                     .setAction("UNDO"){
                         FilmsRepo.saveFilm(context!!, film) {
                             adapter.insertFilm(position, film)

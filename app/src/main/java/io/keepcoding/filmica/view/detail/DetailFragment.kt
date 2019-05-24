@@ -15,6 +15,7 @@ import com.squareup.picasso.Picasso
 import io.keepcoding.filmica.R
 import io.keepcoding.filmica.data.Film
 import io.keepcoding.filmica.data.FilmsRepo
+import io.keepcoding.filmica.view.films.TAG_FILM
 import io.keepcoding.filmica.view.util.SimpleTarget
 import kotlinx.android.synthetic.main.fragment_detail.*
 import kotlinx.android.synthetic.main.fragment_watchlist.*
@@ -24,10 +25,11 @@ class DetailFragment : Fragment() {
     var film: Film? = null
 
     companion object {
-        fun newInstance(filId: String): DetailFragment {
+        fun newInstance(filId: String, filmType: String): DetailFragment {
             val fragment = DetailFragment()
             val bundle = Bundle()
             bundle.putString("id", filId)
+            bundle.putString("filmType", filmType)
             fragment.arguments = bundle
 
             return fragment
@@ -76,7 +78,10 @@ class DetailFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         val id = arguments?.getString("id", "")
-        film = FilmsRepo.findFilmById(id!!)
+
+        val filmType: String = arguments?.getString("filmType") ?: ""
+
+        film = FilmsRepo.findFilmById(id!!, filmType)
 
         film?.let {
             labelTitle.text = it.title
@@ -90,23 +95,23 @@ class DetailFragment : Fragment() {
 
         buttonAdd.setOnClickListener {
             film?.let {
-
-                FilmsRepo.saveFilm(context!!, it) {
-                  //  Toast.makeText(context, "Añadido al watchlist", Toast.LENGTH_LONG).show()
-
-                    val item = it
-
-                    Snackbar.make(this.view!!, "Added to Watchlist", Snackbar.LENGTH_LONG)
-                            .setAction("UNDO", {
-                                FilmsRepo.deleteFilm(context!! , item) {
-                                    Toast.makeText(context, "Watchlist restored", Toast.LENGTH_SHORT).show()
-                                }
-                            })
-                            .setActionTextColor(Color.WHITE)
-                            .show()
-
-                }
+                addFilmToWatchlist(it)
             }
+        }
+    }
+
+    private fun addFilmToWatchlist(film: Film) {
+        FilmsRepo.saveFilm(context!!, film) {
+
+            Snackbar.make(this.view!!, R.string.add_watchlist, Snackbar.LENGTH_LONG)
+                .setAction("UNDO") {
+                    FilmsRepo.deleteFilm(context!!, film) {
+                        Toast.makeText(context, R.string.restore_watchlist, Toast.LENGTH_SHORT).show()
+                    }
+                }
+                .setActionTextColor(Color.WHITE)
+                .show()
+
         }
     }
 

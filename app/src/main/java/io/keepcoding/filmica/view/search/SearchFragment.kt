@@ -16,9 +16,6 @@ import io.keepcoding.filmica.view.util.GridOffsetDecoration
 import kotlinx.android.synthetic.main.fragment_search.*
 import kotlinx.android.synthetic.main.layout_error_search.view.*
 
-const val ERROR_CHARS = "Please, insert at least 3 characters."
-const val ERROR_EMPTY = "Sorry, no movies found. Try again."
-
 class SearchFragment : Fragment() {
 
     lateinit var listener: FilmsFragment.OnFilmClickLister
@@ -71,7 +68,7 @@ class SearchFragment : Fragment() {
         val query = txtSearch.text.toString()
 
         if (query.length < 3 ) {
-            showError(ERROR_CHARS)
+            showError(R.string.ERROR_CHARS.toString())
         }
         else {
 
@@ -79,12 +76,17 @@ class SearchFragment : Fragment() {
                 txtSearch.text.toString(),
                 { films ->
                     adapter.setFilms(films)
-                    showList()
+                    if (films.size == 0) {
+                        showError(R.string.ERROR_EMPTY.toString())
+                    } else {
+                        showList()
+                    }
 
                 }, { errorRequest ->
-                    showError(ERROR_EMPTY)
+                    showError(R.string.ERROR_WRONG.toString())
                 })
         }
+
     }
 
 
