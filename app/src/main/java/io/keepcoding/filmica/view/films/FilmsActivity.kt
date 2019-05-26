@@ -31,29 +31,34 @@ class FilmsActivity : AppCompatActivity(),
     private lateinit var searchFragment: SearchFragment
     private lateinit var activeFragment: Fragment
 
+    private var detailSelected: Boolean = false
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_films)
 
         if (savedInstanceState == null) {
-            setupFragments()
             if (isDetailViewAvailable())
                 showPlaceholder()
+
+            setupFragments()
         } else {
+            if (isDetailViewAvailable() and detailSelected)
+                showPlaceholder()
+
             val activeTag = savedInstanceState.getString("active", TAG_FILM)
             restoreFragments(activeTag)
-//            if (isDetailViewAvailable())
-               // showPlaceholder()
+
         }
 
         // Show the correct fragment taking into account the menu button clicked
         navigation.setOnNavigationItemSelectedListener {
             when (it.itemId) {
-                R.id.action_discover -> showMainFragment(filmsFragment)
-                R.id.action_trending -> showMainFragment(trendsFragment)
-                R.id.action_watchlist -> showMainFragment(watchlistFragment)
-                R.id.action_search -> showMainFragment(searchFragment)
+                R.id.action_discover -> showMainFragment(filmsFragment, false)
+                R.id.action_trending -> showMainFragment(trendsFragment, false)
+                R.id.action_watchlist -> showMainFragment(watchlistFragment, true)
+                R.id.action_search -> showMainFragment(searchFragment, false)
             }
 
             true
@@ -101,11 +106,25 @@ class FilmsActivity : AppCompatActivity(),
 
     }
 
-    private fun showMainFragment(fragment: Fragment) {
-        supportFragmentManager.beginTransaction()
-            .hide(activeFragment)
-            .show(fragment)
-            .commit()
+    private fun showMainFragment(fragment: Fragment, isWatchlist: Boolean) {
+
+        if (isDetailViewAvailable()) {
+            showPlaceholder()
+        }
+
+        if (isWatchlist) {
+            supportFragmentManager.beginTransaction()
+                .hide(activeFragment)
+                .detach(fragment)
+                .attach(fragment)
+                .show(fragment)
+                .commit()
+        } else {
+            supportFragmentManager.beginTransaction()
+                .hide(activeFragment)
+                .show(fragment)
+                .commit()
+        }
 
         activeFragment = fragment
     }
@@ -115,6 +134,8 @@ class FilmsActivity : AppCompatActivity(),
         supportFragmentManager.beginTransaction()
             .replace(R.id.container_detail, fragment)
             .commit()
+
+        detailSelected = false
     }
 
     override fun onClick(film: Film) {
@@ -123,6 +144,9 @@ class FilmsActivity : AppCompatActivity(),
             intent.putExtra("id", film.id)
             intent.putExtra("filmType", activeFragment.tag.toString())
             startActivity(intent)
+
+            detailSelected = false
+
         } else {
             supportFragmentManager.beginTransaction()
                 .replace(
@@ -130,6 +154,8 @@ class FilmsActivity : AppCompatActivity(),
                     DetailFragment.newInstance(film.id, activeFragment.tag.toString())
                 )
                 .commit()
+
+            detailSelected = true
         }
     }
 

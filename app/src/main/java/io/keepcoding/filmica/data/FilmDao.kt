@@ -10,6 +10,9 @@ interface FilmDao {
     @Query("SELECT * FROM film")
     fun getFilms(): List<Film>
 
+    @Query("SELECT * FROM film WHERE id = :idFilm")
+    fun getFilmById(idFilm: String): Film
+
     @Delete
     fun deleteFilm(film: Film)
 }

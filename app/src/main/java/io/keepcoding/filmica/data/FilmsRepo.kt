@@ -92,6 +92,7 @@ object FilmsRepo {
         }
     }
 
+
     fun deleteFilm(
         context: Context,
         film: Film,
@@ -110,52 +111,64 @@ object FilmsRepo {
 
     fun discoverFilms(
         context: Context,
+        page: Int = 1,
         onResponse: (List<Film>) -> Unit,
         onError: (VolleyError) -> Unit
     ) {
-        val url = ApiRoutes.discoverMoviesUrl()
-        val request = JsonObjectRequest(Request.Method.GET, url, null,
-            { response ->
-                val films =
-                    Film.parseFilms(response.getJSONArray("results"))
-                FilmsRepo.discoverFilms.clear()
-                FilmsRepo.discoverFilms.addAll(films)
-                onResponse.invoke(FilmsRepo.discoverFilms)
-            },
-            { error ->
-                error.printStackTrace()
-                onError.invoke(error)
-            }
-        )
 
-        Volley.newRequestQueue(context)
-            .add(request)
+        if (discoverFilms.isEmpty() || (page > 1)) {
+
+            val url = ApiRoutes.discoverMoviesUrl(page = page)
+            val request = JsonObjectRequest(Request.Method.GET, url, null,
+                { response ->
+                    val films =
+                        Film.parseFilms(response.getJSONArray("results"))
+                   // FilmsRepo.discoverFilms.clear()
+                    FilmsRepo.discoverFilms.addAll(films)
+                    onResponse.invoke(FilmsRepo.discoverFilms)
+                },
+                { error ->
+                    error.printStackTrace()
+                    onError.invoke(error)
+                }
+            )
+
+            Volley.newRequestQueue(context)
+                .add(request)
+
+        } else {
+            onResponse.invoke(discoverFilms)
+        }
     }
-
 
     // Create a func to get Trendings
     fun trendingFilms(
         context: Context,
+        page: Int = 1,
         onResponse: (List<Film>) -> Unit,
         onError: (VolleyError) -> Unit
     ) {
-        val url = ApiRoutes.trendingMoviesUrl()
-        val request = JsonObjectRequest(Request.Method.GET, url, null,
-            { response ->
-                val films =
-                    Film.parseFilms(response.getJSONArray("results"))
-                FilmsRepo.trendingFilms.clear()
-                FilmsRepo.trendingFilms.addAll(films)
-                onResponse.invoke(FilmsRepo.trendingFilms)
-            },
-            { error ->
-                error.printStackTrace()
-                onError.invoke(error)
-            }
-        )
+        if (trendingFilms.isEmpty() || (page > 1)) {
+            val url = ApiRoutes.trendingMoviesUrl(page = page)
+            val request = JsonObjectRequest(Request.Method.GET, url, null,
+                { response ->
+                    val films =
+                        Film.parseFilms(response.getJSONArray("results"))
+                    //FilmsRepo.trendingFilms.clear()
+                    FilmsRepo.trendingFilms.addAll(films)
+                    onResponse.invoke(FilmsRepo.trendingFilms)
+                },
+                { error ->
+                    error.printStackTrace()
+                    onError.invoke(error)
+                }
+            )
 
-        Volley.newRequestQueue(context)
-            .add(request)
+            Volley.newRequestQueue(context)
+                .add(request)
+            } else {
+                onResponse.invoke(trendingFilms)
+            }
     }
 
 

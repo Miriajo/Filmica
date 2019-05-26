@@ -7,13 +7,15 @@ object ApiRoutes {
 
     fun discoverMoviesUrl(
         language: String = "en-US",
-        sort: String = "popularity.desc"
+        sort: String = "popularity.desc",
+        page: Int = 1
     ): String {
         return getUriBuilder()
             .appendPath("discover")
             .appendPath("movie")
             .appendQueryParameter("language", language)
             .appendQueryParameter("sort_by", sort)
+            .appendQueryParameter("page", page.toString())
             .appendQueryParameter("include_adult", "false")
             .appendQueryParameter("include_video", "false")
             .build()
@@ -23,7 +25,8 @@ object ApiRoutes {
     // Create a function to return TRENDS url
     fun trendingMoviesUrl(
         language: String = "en-US",
-        sort: String = "popularity.desc"
+        sort: String = "popularity.desc",
+        page: Int = 1
     ): String {
         return getUriBuilder()
             .appendPath("trending")
@@ -31,6 +34,7 @@ object ApiRoutes {
             .appendPath("week")
             .appendQueryParameter("language", language)
             .appendQueryParameter("sort_by", sort)
+            .appendQueryParameter("page", page.toString())
             .appendQueryParameter("include_adult", "false")
             .appendQueryParameter("include_video", "false")
             .build()

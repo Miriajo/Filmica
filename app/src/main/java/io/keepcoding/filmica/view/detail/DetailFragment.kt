@@ -10,19 +10,23 @@ import android.support.v4.app.Fragment
 import android.support.v4.content.ContextCompat
 import android.support.v7.graphics.Palette
 import android.view.*
+import android.support.v7.app.AppCompatActivity
+import android.widget.FrameLayout
 import android.widget.Toast
 import com.squareup.picasso.Picasso
 import io.keepcoding.filmica.R
 import io.keepcoding.filmica.data.Film
 import io.keepcoding.filmica.data.FilmsRepo
-import io.keepcoding.filmica.view.films.TAG_FILM
+import io.keepcoding.filmica.view.films.FilmsActivity
 import io.keepcoding.filmica.view.util.SimpleTarget
+import kotlinx.android.synthetic.*
 import kotlinx.android.synthetic.main.fragment_detail.*
-import kotlinx.android.synthetic.main.fragment_watchlist.*
 
 class DetailFragment : Fragment() {
 
     var film: Film? = null
+
+    var isWatchlistShown: Boolean = false
 
     companion object {
         fun newInstance(filId: String, filmType: String): DetailFragment {
@@ -101,19 +105,26 @@ class DetailFragment : Fragment() {
     }
 
     private fun addFilmToWatchlist(film: Film) {
-        FilmsRepo.saveFilm(context!!, film) {
 
-            Snackbar.make(this.view!!, R.string.add_watchlist, Snackbar.LENGTH_LONG)
-                .setAction("UNDO") {
-                    FilmsRepo.deleteFilm(context!!, film) {
-                        Toast.makeText(context, R.string.restore_watchlist, Toast.LENGTH_SHORT).show()
+
+        if (!isWatchlistShown)
+        {
+            FilmsRepo.saveFilm(context!!, film) {
+
+                Snackbar.make(this.view!!, R.string.add_watchlist, Snackbar.LENGTH_LONG)
+                    .setAction("UNDO") {
+                        FilmsRepo.deleteFilm(context!!, film) {
+                            Toast.makeText(context, R.string.restore_watchlist, Toast.LENGTH_SHORT).show()
+                        }
                     }
-                }
-                .setActionTextColor(Color.WHITE)
-                .show()
+                    .setActionTextColor(Color.WHITE)
+                    .show()
 
+            }
         }
+
     }
+
 
     private fun loadImage(film: Film) {
         val target = SimpleTarget {
@@ -147,4 +158,5 @@ class DetailFragment : Fragment() {
             buttonAdd.backgroundTintList = ColorStateList.valueOf(color)
         }
     }
+
 }
